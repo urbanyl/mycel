@@ -1,8 +1,9 @@
 import re
 from pathlib import Path
 
-import numpy as np
 import pytest
+
+np = pytest.importorskip("numpy")
 
 from mycel.native.gen import NativeError, build_native
 
