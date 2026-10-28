@@ -4,6 +4,27 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow the spec version, with a patch number for the reference front end.
 
+## [0.9.2] - 2026-10-28
+
+### Added
+
+- **Native rendering backend.** `mycel build` lowers a ledger to a self-contained
+  executable: Win32 window, software rasteriser with a z-buffer, GDI text, ~60 fps.
+  No Python, no interpreter, no third-party DLLs. A 1.7 MiB binary.
+- `runtime/myc`: pure-Go runtime (window, rasteriser, camera, scene, body).
+- Render directives: `$ view`, `$ style`, `$ camera`, `$ body`, `$ policy`, `$ panel`.
+- Live **neural tissue panel**: 24-cell ring with synapses, CPG marker, sensory and
+  motor vectors, activity raster. `$ panel brain`.
+- Native biped: the 1168-parameter tissue is baked into the binary at build time.
+- `examples/06-biped-native.myc`.
+- `docs/09-native-rendering.md`.
+- String literals in the lexer (for window titles), with `MYC0104` on unterminated input.
+
+### Fixed
+
+- `zeros[...]` fields were re-evaluated every tick, overwriting trainer-injected biases.
+- Viewport support on `Camera` so a 3D scene and a 2D overlay can share a framebuffer.
+
 ## [0.9.1] - 2026-10-28
 
 ### Added

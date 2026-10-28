@@ -118,6 +118,22 @@ def tokenize(source: str) -> List[Token]:
                 continue
             raise err("MYC0102", "backslash is only legal at end of line", line, col)
 
+        # -- string literals ----------------------------------------------
+        if ch == '"':
+            start = i
+            start_col = col
+            i += 1
+            col += 1
+            while i < n and source[i] not in '"\r\n':
+                i += 1
+                col += 1
+            if i >= n or source[i] != '"':
+                raise err("MYC0104", "unterminated string literal", line, start_col)
+            i += 1
+            col += 1
+            tokens.append(Token("STRING", source[start + 1 : i - 1], line, start_col))
+            continue
+
         # -- comments -----------------------------------------------------
         if ch == "#":
             while i < n and source[i] not in "\r\n":

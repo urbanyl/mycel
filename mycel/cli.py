@@ -86,6 +86,80 @@ def cmd_units(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_build(args: argparse.Namespace) -> int:
+    from .native import NativeError, build_native
+
+    try:
+        artifact = build_native(args.path, args.out, build=not args.emit_only)
+    except NativeError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    print()
+    print(f"  native artifact  {artifact}")
+    return 0
+
+
+def cmd_train(args: argparse.Namespace) -> int:
+    try:
+        import numpy  # noqa: F401
+    except ImportError:
+        print("error: `mycel train` needs numpy. pip install 'mycel-lang[sim]'", file=sys.stderr)
+        return 2
+
+    from .walker.train import train
+
+    source = _read(args.path)
+    out = Path(args.out)
+    result = train(
+        source,
+        out,
+        generations=args.generations,
+        population=args.population,
+        sigma=args.sigma,
+        lr=args.rate,
+        duration=args.duration,
+        seed=args.seed,
+    )
+
+    print()
+    print(f"  best distance   {result['distance']:.2f} m in 6 s")
+    print(f"  baseline        {result['baseline_distance']:.2f} m (untrained tissue)")
+    fell = result["fallen_at"]
+    print(f"  fell at         {'never' if fell is None else f'{fell:.2f} s'}")
+    print(f"  artefacts       {out}")
+
+    if not args.no_render:
+        try:
+            from .walker.render import contact_sheet, learning_curve, render_gif
+        except ImportError:
+            print("  (matplotlib not installed: skipping renders)", file=sys.stderr)
+            return 0
+        import json
+
+        import numpy as np
+
+        trace = np.load(out / "trace.npz")
+        baseline = np.load(out / "trace_baseline.npz")
+        metrics = json.loads((out / "metrics.json").read_text(encoding="utf-8"))
+
+        render_gif(
+            {"pos": trace["pos"], "cmd": trace["cmd"], "dt": float(trace["dt"])},
+            out / "walk.gif",
+            title="MYCEL / evolved biped",
+            subtitle=f"{result['population']} variants  x  {result['generations']} generations  "
+            f"({result['params']} parameters)",
+        )
+        contact_sheet(
+            {"pos": baseline["pos"], "dt": float(baseline["dt"])},
+            {"pos": trace["pos"], "dt": float(trace["dt"])},
+            out / "contact_sheet.png",
+            labels=("before training", "after training"),
+        )
+        learning_curve(metrics["history"], out / "learning_curve.png")
+        print(f"  rendered        walk.gif, contact_sheet.png, learning_curve.png")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="mycel",
@@ -111,6 +185,24 @@ def build_parser() -> argparse.ArgumentParser:
     uni = sub.add_parser("units", help="normalise an SI unit expression")
     uni.add_argument("expr", nargs="+")
     uni.set_defaults(func=cmd_units)
+
+    trn = sub.add_parser("train", help="execute a walking ledger and evolve its tissue")
+    trn.add_argument("path")
+    trn.add_argument("--out", default="runs/walker")
+    trn.add_argument("--generations", type=int, default=None)
+    trn.add_argument("--population", type=int, default=None)
+    trn.add_argument("--sigma", type=float, default=None)
+    trn.add_argument("--rate", type=float, default=None)
+    trn.add_argument("--duration", type=float, default=4.0)
+    trn.add_argument("--seed", type=int, default=7)
+    trn.add_argument("--no-render", action="store_true")
+    trn.set_defaults(func=cmd_train)
+
+    bld = sub.add_parser("build", help="lower a ledger to a self-contained native executable")
+    bld.add_argument("path")
+    bld.add_argument("--out", default=None)
+    bld.add_argument("--emit-only", action="store_true")
+    bld.set_defaults(func=cmd_build)
 
     return p
 

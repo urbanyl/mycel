@@ -1,0 +1,81 @@
+# =====================================================================
+#  MYCEL / 06 - native 3D rendering
+#
+#  Same ledger as 05, plus a render block. `mycel build` lowers this
+#  file to a self-contained executable: Win32 window, software
+#  rasteriser with a z-buffer, GDI text, no Python and no DLLs.
+#
+#    mycel build examples/06-biped-native.myc
+#    build/walker3d/walker3d.exe
+# =====================================================================
+
+$ view   1480x800 title "MYCEL / native 3D"
+$ style  3d
+$ panel  brain
+$ camera at [4.2,1.9,-5.0] look [0,0.75,0] fov 38 follow 4.2
+$ body   Biped2D
+$ policy ../runs/demo/theta.npz
+$ name   walker3d
+
+$ world dt=4ms solver=rk4
+
+# ---------------------------------------------------------------------
+#  SENSORY STREAMS
+# ---------------------------------------------------------------------
+@ pitch    ~> body.pitch        : real[] rad
+@ dpitch   ~> body.pitch_rate   : real[] rad/s
+@ hipL     ~> body.hipL         : real[] rad
+@ kneeL    ~> body.kneeL        : real[] rad
+@ hipR     ~> body.hipR         : real[] rad
+@ kneeR    ~> body.kneeR        : real[] rad
+@ dhipL    ~> body.dhipL        : real[] rad/s
+@ dkneeL   ~> body.dkneeL       : real[] rad/s
+@ dhipR    ~> body.dhipR        : real[] rad/s
+@ dkneeR   ~> body.dkneeR       : real[] rad/s
+@ contactL ~> body.contactL     : real[] 1
+@ contactR ~> body.contactR     : real[] 1
+
+@ pi    := 3.141592653589793    : real[] rad
+@ f_cpg := 1.60                 : real[] Hz
+@ phi  << 2 * pi * f_cpg        seed 0     : real[] rad
+
+@ cpg  := cat[phase]( sin(phi) , cos(phi) , \
+                      relu(sin(phi)) , relu(-sin(phi)) )  : real[phase 4] 1
+
+@ x := cat[in]( pitch , dpitch , \
+                sin(hipL) , sin(kneeL) , sin(hipR) , sin(kneeR) , \
+                dhipL , dkneeL , dhipR , dkneeR , \
+                contactL , contactR , \
+                sin(phi) , cos(phi) )            : real[in 14] 1
+
+# ---------------------------------------------------------------------
+#  LIQUID TISSUE
+# ---------------------------------------------------------------------
+@ W     := randn[post 24, pre 24](0.0, 0.18)     : real[post 24, pre 24] 1
+@ U     := randn[post 24, in 14](0.0, 0.18)      : real[post 24, in 14] 1
+@ b     := zeros[post 24]                        : real[post 24] 1
+@ W_out := randn[out 8, post 24](0.0, 0.25)      : real[out 8, post 24] 1
+@ G_ph  := randn[out 8, phase 4](0.0, 0.45)      : real[out 8, phase 4] 1
+@ b_out := zeros[out 8]                          : real[out 8] 1
+
+@ tau := 40ms                                     : real[] s
+@ h   << ( -h + tanh( W .*[pre] ( h >>[post:pre] ) + U .*[in] x + b ) ) / tau \
+        seed zeros[post 24]                       : real[post 24] 1
+@ y   := clamp( W_out .*[post] h + G_ph .*[phase] cpg + b_out , 1.0 ) \
+                                                  : real[out 8] 1
+
+@ cmd := y                                        : real[out 8] 1
+@ cmd !> body.commands
+
+# ---------------------------------------------------------------------
+#  RENDER GRAPH
+#
+#  The scene is a field like any other: the body is a sink, the camera
+#  is a transform, and `present` is the only operation that touches the
+#  swap chain. Everything downstream of it is native.
+# ---------------------------------------------------------------------
+@ present !> view.present
+
+assert cmd : real[out 8]
+assert sum[pre]( W ) : real[post 24]
+assert acyclic( G_ph , time )

@@ -13,6 +13,7 @@
   <a href="https://github.com/urbanyl/mycel/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/urbanyl/mycel?labelColor=0B141C&color=4FD6E9"></a>
   <a href="https://github.com/urbanyl/mycel/issues"><img alt="Issues" src="https://img.shields.io/github/issues/urbanyl/mycel?labelColor=0B141C&color=B78CFF"></a>
   <a href="https://github.com/urbanyl/mycel/pkgs/container/mycel"><img alt="Container" src="https://img.shields.io/badge/ghcr.io-urbanyl%2Fmycel-2496ED?logo=docker&logoColor=white&labelColor=0B141C"></a>
+  <a href="docs/09-native-rendering.md"><img alt="Native" src="https://img.shields.io/badge/native-single%20binary-6FE9D4?labelColor=0B141C"></a>
 </p>
 
 <p align="center">
@@ -186,6 +187,49 @@ Read: [03 - Compiler Pipeline](docs/03-compiler-pipeline.md) &middot;
 
 ---
 
+## Native rendering — a single binary, no Python
+
+Rendering is a **backend**, not a library. A ledger that declares a view is
+lowered to a self-contained executable: Win32 window, software rasteriser
+with a z-buffer, GDI text, ~60 fps, no interpreter and no third-party DLLs.
+
+```myc
+$ view   1280x720 title "MYCEL / native 3D"
+$ style  3d
+$ camera at [4.2,1.9,-5.0] look [0,0.75,0] fov 38 follow 4.2
+$ body   Biped2D
+$ policy ../runs/demo/theta.npz
+```
+
+```bash
+mycel build examples/06-biped-native.myc   # Go toolchain needed at build time only
+#   go build -> build/walker3d/walker3d.exe
+#   walker3d.exe  1.66 MiB  (no Python, no DLLs)
+```
+
+The 1168 tissue parameters are baked into the binary at build time; the
+runtime evaluates exactly the equations the ledger declares.
+
+| | |
+|---|---|
+| frame time @1280x720 | 2.1–3.4 ms |
+| binary | 1.66 MiB |
+| resident memory | ~14 MiB |
+| runtime deps | `user32.dll`, `gdi32.dll`, nothing else |
+
+<p align="center">
+  <img src="assets/native-window.png" alt="MYCEL native window: 3D biped + live neural tissue" width="100%">
+</p>
+
+<p align="center"><sub>
+The same binary: 3D scene on the left, the 24-cell liquid tissue driving it on the right —
+synapses, sensory vector, motor vector, and a live activity raster.
+</sub></p>
+
+Read: [09 - Native Rendering](docs/09-native-rendering.md)
+
+---
+
 ## Install and run
 
 The reference **front end** is pure Python with no dependencies: lexer, ledger parser, SI
@@ -251,6 +295,7 @@ Intellectual honesty, stated up front.
 | `myc-flow` integrators, `myc-diff` lowering | 📐 specified |
 | GPU / Metal / NPU / Loihi / Akida backends | 📐 specified |
 | Static memory planner and certificates | 📐 specified |
+| Native rendering backend (Win32 + software raster) | ✅ implemented |
 
 This repository is a **specification that can be tested**, not a compiler you can ship to a
 robot today. See [08 - Roadmap](docs/08-roadmap.md) for the order in which that changes.

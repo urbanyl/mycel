@@ -1,0 +1,127 @@
+# =====================================================================
+#  MYCEL / 05 - learning to walk
+#
+#  A planar biped, a liquid neural tissue, and an evolutionary search
+#  over the tissue's weights. This file is executed by `mycel train`.
+#
+#    mycel train examples/05-walker-learn.myc --out runs/walker
+#
+#  Nothing about walking is written below. The body is a standard-library
+#  primitive; the ledger only says what the controller reads, what it
+#  writes, and what it is trying to maximise.
+# =====================================================================
+
+$ world dt=4ms solver=rk4
+$ deploy variant V=64 generations 60 sigma 0.09 rate 0.06
+
+# ---------------------------------------------------------------------
+#  SENSORY STREAMS - the body pushes, the ledger never polls
+#
+#  pitch       torso lean from vertical            rad
+#  dpitch      its rate                            rad/s
+#  hipL..kneeR the four joint angles               rad
+#  contactL/R  foot on the ground                  1
+#  vx          forward speed of the hip            m/s
+# ---------------------------------------------------------------------
+@ pitch    ~> body.pitch        : real[] rad
+@ dpitch   ~> body.pitch_rate   : real[] rad/s
+@ hipL     ~> body.hipL         : real[] rad
+@ kneeL    ~> body.kneeL        : real[] rad
+@ hipR     ~> body.hipR         : real[] rad
+@ kneeR    ~> body.kneeR        : real[] rad
+@ dhipL    ~> body.dhipL        : real[] rad/s
+@ dkneeL   ~> body.dkneeL       : real[] rad/s
+@ dhipR    ~> body.dhipR        : real[] rad/s
+@ dkneeR   ~> body.dkneeR       : real[] rad/s
+@ contactL ~> body.contactL     : real[] 1
+@ contactR ~> body.contactR     : real[] 1
+@ vx       ~> body.vx           : real[] m/s
+
+@ pi    := 3.141592653589793    : real[] rad
+@ f_cpg := 1.60                 : real[] Hz
+
+# ---------------------------------------------------------------------
+#  CENTRAL PATTERN GENERATOR
+#
+#  A phase field, not a counter. It is the clock the tissue listens to,
+#  and it costs the runtime one scalar ODE.
+# ---------------------------------------------------------------------
+@ phi  << 2 * pi * f_cpg          seed 0     : real[] rad
+@ cpg  := cat[phase]( sin(phi) , cos(phi) , \
+                      relu(sin(phi)) , relu(-sin(phi)) )  : real[phase 4] 1
+
+# ---------------------------------------------------------------------
+#  FEATURE FUSION
+#
+#  cat[in] introduces the 'in' axis. It is never implicit: every weight
+#  below must name the axis it consumes.
+# ---------------------------------------------------------------------
+@ x := cat[in]( pitch , dpitch , \
+                sin(hipL) , sin(kneeL) , sin(hipR) , sin(kneeR) , \
+                dhipL , dkneeL , dhipR , dkneeR , \
+                contactL , contactR , \
+                sin(phi) , cos(phi) )            : real[in 14] 1
+
+# ---------------------------------------------------------------------
+#  LIQUID NEURAL TISSUE
+#
+#      tau * dh/dt = -h + tanh( W .*[pre] h + U .*[in] x + b )
+#      y           = tanh( W_out .*[post] h + b_out )
+#
+#  h is not computed. h IS the solution of the field equation, integrated
+#  by the runtime at the physics rate.
+# ---------------------------------------------------------------------
+@ W     := randn[post 24, pre 24](0.0, 0.18)     : real[post 24, pre 24] 1
+@ U     := randn[post 24, in 14](0.0, 0.18)      : real[post 24, in 14] 1
+@ b     := zeros[post 24]                        : real[post 24] 1
+@ W_out := randn[out 8, post 24](0.0, 0.25)      : real[out 8, post 24] 1
+@ G_ph  := randn[out 8, phase 4](0.0, 0.45)      : real[out 8, phase 4] 1
+@ b_out := zeros[out 8]                          : real[out 8] 1
+
+@ tau := 40ms                                     : real[] s
+@ h   << ( -h + tanh( W .*[pre] ( h >>[post:pre] ) + U .*[in] x + b ) ) / tau \
+        seed zeros[post 24]                       : real[post 24] 1
+@ y   := clamp( W_out .*[post] h + G_ph .*[phase] cpg + b_out , 1.0 ) \
+                                                  : real[out 8] 1
+
+# ---------------------------------------------------------------------
+#  ACTUATION
+#
+#  The tissue does not command torques. It commands where to put each
+#  foot, how high to lift it, and how hard to push off - which is what a
+#  locomotion policy actually decides.
+#
+#      y[0] foot L forward offset      y[4] torso lean
+#      y[1] foot L lift                y[5] left leg extension
+#      y[2] foot R forward offset      y[6] right leg extension
+#      y[3] foot R lift                y[7] reserved
+# ---------------------------------------------------------------------
+@ cmd := y                                        : real[out 8] 1
+@ cmd !> body.commands
+
+# ---------------------------------------------------------------------
+#  OBJECTIVE
+#
+#  Forward speed, discounted by torso lean and by how hard the tissue is
+#  working. Falling is punished by the scheduler, not by this integral.
+# ---------------------------------------------------------------------
+@ rew := int[0s..5s] ( vx - 0.35 * norm(pitch) - 0.02 * norm(cmd) ) \
+                                                  : real[] m
+
+# ---------------------------------------------------------------------
+#  EVOLUTIONARY OPERATOR
+#
+#  A population is an axis, not a process pool: 64 mutants are one
+#  tensor and their rollouts are one batched integration.
+# ---------------------------------------------------------------------
+@ G := genome( W , U , b , W_out , b_out )
+@ P := G <<<[rate 60 generations] vary( mutate 0.09 ) \
+           seed clone( G , variant V )
+@ LP := rollout( body , P )                       : real[variant V] m
+@ G  <<< argmax[LP](P) ++ archive_best
+
+assert cmd : real[out 8]
+assert sum[pre]( W ) : real[post 24]
+assert in_axis( U , in 15 )
+assert acyclic( G , time )
+assert wcet(tick) <= 4ms
