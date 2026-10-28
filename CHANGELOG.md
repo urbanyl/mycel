@@ -21,6 +21,7 @@ Versions follow the spec version, with a patch number for the reference front en
 - Documentation set (`docs/00` .. `docs/08`)
 - Normative `spec/grammar.ebnf` and `spec/operators.tsv`
 - GitHub Actions CI (Linux, macOS, Windows x Python 3.9-3.13) and a wheel build job
+- GHCR container image `ghcr.io/urbanyl/mycel` built and published on every push to `main`
 
 ### Changed
 

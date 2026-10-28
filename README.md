@@ -12,6 +12,7 @@
   <a href="https://github.com/urbanyl/mycel/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/urbanyl/mycel?style=flat&labelColor=0B141C&color=6FE9D4"></a>
   <a href="https://github.com/urbanyl/mycel/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/urbanyl/mycel?labelColor=0B141C&color=4FD6E9"></a>
   <a href="https://github.com/urbanyl/mycel/issues"><img alt="Issues" src="https://img.shields.io/github/issues/urbanyl/mycel?labelColor=0B141C&color=B78CFF"></a>
+  <a href="https://github.com/urbanyl/mycel/pkgs/container/mycel"><img alt="Container" src="https://img.shields.io/badge/ghcr.io-urbanyl%2Fmycel-2496ED?logo=docker&logoColor=white&labelColor=0B141C"></a>
 </p>
 
 <p align="center">
@@ -212,6 +213,12 @@ $ mycel check examples/01-biped-walker.myc
 
 ```bash
 pytest            # 59 tests
+```
+
+Or run it without installing anything:
+
+```bash
+docker run --rm -v "$PWD:/work" ghcr.io/urbanyl/mycel check /work/examples/01-biped-walker.myc
 ```
 
 ---
