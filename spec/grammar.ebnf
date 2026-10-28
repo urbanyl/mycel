@@ -1,0 +1,100 @@
+(* ============================================================
+   MYCEL 0.9a - normative grammar
+   Surface alphabet: 94 printable ASCII code points.
+   Newline terminates every entry. There is no ';'.
+   Indentation is never significant.
+   ============================================================ *)
+
+ledger        = { entry } ;
+
+entry         = role , ident , [ connective , expression ]
+                [ seed ] [ ":" , type ] [ guard ] , newline ;
+
+role          = "@"        (* field declaration             *)
+              | "%"        (* assembly declaration          *)
+              | "$"        (* world / target directive      *)
+              | "assert"   (* compile-time obligation       *)
+              | ">"        (* export port (inside "%")      *)
+              ;
+
+connective    = ":="       (* bind - timeless               *)
+              | "~>"       (* synapse - event stream        *)
+              | "=>"       (* flow - differentiable         *)
+              | "<<"       (* recur - continuous state     *)
+              | "<<<"      (* evolve - structural           *)
+              | "!>"       (* actuate - physical sink       *)
+              ;
+
+seed          = "seed" , expression ;
+guard         = "|" , expression ;
+
+(* ---------- types ---------- *)
+
+type          = manifold , "[" , axes , "]" , unit ;
+manifold      = "real" | "S2" | "S3" | "SO3" | "SE3" | "Tan" | "Cot" ;
+axes          = axis , { "," , axis } ;
+axis          = ident , expression ;
+unit          = unit_expr | "1" ;
+
+unit_expr     = unit_factor , { ( "*" | "/" ) , unit_factor } ;
+unit_factor   = unit_atom , [ "^" , rational ] ;
+unit_atom     = "kg" | "m" | "s" | "A" | "K" | "mol" | "cd"
+              | "N" | "J" | "W" | "Pa" | "Hz" | "C" | "V" | "Ohm"
+              | "T" | "F" | "H" | "S" | "Gy" | "Sv" | "rad" | "sr" ;
+rational      = [ "-" ] , integer , [ "/" , integer ] ;
+
+(* ---------- expressions ---------- *)
+
+expression    = term , { binop , term } ;
+binop         = ".*" , "[" , ident , "]"    (* contraction over named axis *)
+              | "**"                         (* outer product                *)
+              | "~*"                         (* manifold product             *)
+              | "++"                         (* topological fusion           *)
+              | "*" | "/" | "+" | "-"
+              | ">=" | "<=" | "==" | "!="
+              | "|"                          (* guard                        *)
+              ;
+
+term          = number , [ unit_atom ]
+              | ident
+              | ident , "(" , [ arglist ] , ")"
+              | ident , "[" , ident , "]" , "(" , [ arglist ] , ")"
+              | "(" , expression , ")"
+              | "?" , ident , "(" , [ arglist ] , ")"          (* sample      *)
+              | "grad" , "(" , expression , "," , expression , ")"
+              | "int" , "[" , expression , ".." , expression , "]" , expression
+              | "argmax" , "[" , expression , "]" , "(" , expression , ")"
+              | "cut" , "(" , expression , ")"
+              | "surro" , "(" , expression , "," , expression , ")"
+              | "pair" , "(" , expression , "," , expression , ")"
+              | "-" , term
+              ;
+
+arglist       = expression , { "," , expression } ;
+
+(* ---------- lexical ---------- *)
+
+ident         = letter , { letter | digit | "_" } , [ "'" ] ;
+number        = digit , { digit } , [ "." , digit , { digit } ]
+                [ ( "e" | "E" ) , [ "+" | "-" ] , digit , { digit } ] ;
+integer       = digit , { digit } ;
+letter        = "A".."Z" | "a".."z" | "_" ;
+digit         = "0".."9" ;
+newline       = "\n" | "\r\n" | "\\" , newline ;   (* '\' continues an entry *)
+comment       = "#" , { any_char_except_newline } ;
+
+(* ---------- lexical constraints ---------- *)
+
+(* MYC0101  any byte outside the 94 printable ASCII code points, in code     *)
+(* MYC0102  ';' '{' '}' anywhere in code                                     *)
+(* MYC0201  unknown connective                                               *)
+(* MYC0301  axis mismatch - no implicit broadcasting                         *)
+(* MYC0302  dimension contradiction (linear)                                 *)
+(* MYC0303  dimension contradiction (nonlinear; needs --smt)                *)
+(* MYC0401  unit mismatch                                                    *)
+(* MYC0402  Tan/Cot unification attempt                                      *)
+(* MYC0501  gradient path cut by cut(...)                                    *)
+(* MYC0502  grad target unreachable from loss                                *)
+(* MYC0601  '<<' has no seed and no ':=' genesis                             *)
+(* MYC0701  wcet(tick) > dt_phys                                             *)
+(* MYC0702  event queue bound not provable                                   *)

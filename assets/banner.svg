@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="1280" height="320" role="img" aria-label="MYCEL — the mycelial reactive field language">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#05070b"/>
+      <stop offset="0.55" stop-color="#0a131d"/>
+      <stop offset="1" stop-color="#061018"/>
+    </linearGradient>
+    <linearGradient id="ink" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8CF8E1"/>
+      <stop offset="0.42" stop-color="#4FD6E9"/>
+      <stop offset="1" stop-color="#B78CFF"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#33E1C4" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#33E1C4" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#1d3646" stroke-width="1" opacity="0.30"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="320" fill="url(#bg)"/>
+  <rect width="1280" height="320" fill="url(#grid)"/>
+  <ellipse cx="1010" cy="150" rx="380" ry="260" fill="url(#glow)"/>
+
+  <g stroke="#2f5f6e" stroke-width="1.2" fill="none" opacity="0.55">
+    <path d="M760 300 C 820 250, 830 210, 900 196 S 1000 150, 1040 96"/>
+    <path d="M900 196 C 940 240, 990 250, 1080 244"/>
+    <path d="M1040 96 C 1100 120, 1160 118, 1230 84"/>
+    <path d="M900 196 C 880 140, 892 96, 940 44"/>
+    <path d="M1080 244 C 1120 300, 1180 306, 1240 288"/>
+    <path d="M1040 96 C 1010 60, 1005 40, 1012 12"/>
+  </g>
+  <g fill="#5EE3D0">
+    <circle cx="760" cy="300" r="4"/>
+    <circle cx="900" cy="196" r="5.5"/>
+    <circle cx="1040" cy="96" r="6.5"/>
+    <circle cx="1080" cy="244" r="4.5"/>
+    <circle cx="940" cy="44" r="4"/>
+    <circle cx="1230" cy="84" r="3.5"/>
+    <circle cx="1012" cy="12" r="3.5"/>
+    <circle cx="1240" cy="288" r="3.5"/>
+  </g>
+  <g fill="none" stroke="#8CF8E1" stroke-width="1" opacity="0.5">
+    <circle cx="900" cy="196" r="14"/>
+    <circle cx="1040" cy="96" r="17"/>
+  </g>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">
+    <text x="78" y="150" font-size="104" font-weight="700" letter-spacing="26" fill="url(#ink)">MYCEL</text>
+    <text x="82" y="196" font-size="19" letter-spacing="1.2" fill="#9FB6C4">continuous reactive field topologies &#183; differentiable dataflow &#183; ASCII-only</text>
+    <text x="82" y="240" font-size="14" letter-spacing="2.4" fill="#5E7A8A">EMBODIED AI &#183; NEURO-EVOLUTION &#183; TENSOR FIELDS &#183; NEUROMORPHIC</text>
+  </g>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">
+    <rect x="1112" y="248" width="118" height="30" rx="15" fill="#0E2230" stroke="#2C5A6B"/>
+    <text x="1171" y="268" font-size="13" text-anchor="middle" fill="#6FE9D4">spec 0.9a</text>
+  </g>
+
+  <rect x="0" y="317" width="1280" height="3" fill="url(#ink)" opacity="0.7"/>
+</svg>

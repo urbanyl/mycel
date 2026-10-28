@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: build and publish artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build backend
+        run: python -m pip install --upgrade build
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Smoke test the wheel
+        shell: bash
+        run: |
+          python -m pip install dist/*.whl
+          mycel --version
+          mycel check examples/01-biped-walker.myc
+
+      - name: Attach artifacts to the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          body: |
+            MYCEL ${{ github.ref_name }}
+
+            The reference front end only: lexer, ledger parser, SI unit algebra,
+            axis algebra, static checker and CLI. The compiler backend described
+            in `docs/03-compiler-pipeline.md` is specified but not implemented.
+
+            Install from source:
+
+            ```
+            pip install git+https://github.com/urbanyl/mycel.git@${{ github.ref_name }}
+            ```
+
+      # Publishing to PyPI is left to maintainers: enable trusted publishing for
+      # this repository on PyPI, then uncomment the job below.
+      #
+      # publish-pypi:
+      #   needs: release
+      #   runs-on: ubuntu-latest
+      #   environment: pypi
+      #   permissions:
+      #     id-token: write
+      #   steps:
+      #     - uses: actions/checkout@v4
+      #     - uses: actions/setup-python@v5
+      #       with: { python-version: "3.12" }
+      #     - run: python -m pip install --upgrade build
+      #     - run: python -m build
+      #     - uses: pypa/gh-action-pypi-publish@release/v1

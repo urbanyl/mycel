@@ -1,0 +1,53 @@
+name: Specification proposal
+description: Add or change a language construct.
+title: "[spec] "
+labels: ["spec", "discussion"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A proposal is only actionable if it answers four questions: what does it desugar
+        to, what does it do under `grad`, what does it lower to on each backend family, and
+        what does it do to WCET.
+  - type: input
+    id: syntax
+    attributes:
+      label: Proposed surface syntax
+      description: ASCII only. At most a few tokens.
+      placeholder: "x ?[a] y"
+    validations:
+      required: true
+  - type: textarea
+    id: semantics
+    attributes:
+      label: Semantics
+      description: What does it mean, precisely? Prefer an equation over a paragraph.
+    validations:
+      required: true
+  - type: textarea
+    id: desugar
+    attributes:
+      label: Desugaring into the RCT
+      description: Does it lower to existing operations, or does it need a new dialect op?
+    validations:
+      required: true
+  - type: textarea
+    id: grad
+    attributes:
+      label: Behaviour under grad(...)
+    validations:
+      required: true
+  - type: textarea
+    id: backends
+    attributes:
+      label: Lowering per backend
+      description: CUDA, Metal, NPU, Loihi 2, CPU. Say "unknown" where you are unsure.
+    validations:
+      required: true
+  - type: textarea
+    id: cost
+    attributes:
+      label: Cost
+      description: Effect on WCET, memory, and compile time.
+    validations:
+      required: true

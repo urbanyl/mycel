@@ -1,0 +1,35 @@
+# =====================================================================
+#  MYCEL / 04 - hello, field
+#
+#  The smallest program that uses the paradigm rather than pretending
+#  it is a procedural language. There is no main, no print, no loop.
+#
+#    mycel check examples/04-hello-field.myc
+#
+#  Read every line as an assertion about the world, not as an
+#  instruction to a machine.
+# =====================================================================
+
+$ world dt=1ms solver=rk4
+
+# --- the world ---------------------------------------------------------
+@ ambient  ~> sensor.thermistor          : real[] K
+@ setpoint := 293.15                     : real[] K
+
+# --- a filter field: a first-order lag, stated, not iterated ----------
+@ tau      := 250ms                      : real[] s
+@ tint     << ( ambient - tint ) / tau   seed 293.15   : real[] K
+
+# --- an effector: a boundary condition on the room ---------------------
+@ gain     := 45.0                       : real[] W/K
+@ power    := gain * ( setpoint - tint ) : real[] W
+@ power    !> actuator.heater
+
+# --- obligations: proved at compile time, erased before runtime --------
+assert ambient : real[] K
+assert power   : real[] W
+assert pair( power / gain , setpoint - tint ) : real[] K
+
+# What is absent is the point:
+#   no fn, no def, no return, no for, no while, no if, no braces, no ';'
+#   tint is not computed. tint IS the solution of a differential equation.

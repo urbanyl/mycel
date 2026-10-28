@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800" role="img" aria-label="MYCEL compilation pipeline">
+  <defs>
+    <linearGradient id="abg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#05080c"/>
+      <stop offset="1" stop-color="#070f16"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8CF8E1"/>
+      <stop offset="1" stop-color="#B78CFF"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#3E7A8C"/>
+    </marker>
+    <marker id="arrowAccent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#6FE9D4"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="800" fill="url(#abg)"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">
+    <text x="80" y="58" font-size="15" letter-spacing="4" fill="#5E7A8A">MYCEL / COMPILATION PIPELINE</text>
+    <text x="80" y="92" font-size="26" letter-spacing="0.5" fill="#D7E9F1">From an order-free ledger to four kinds of silicon.</text>
+  </g>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">
+
+    <!-- ROW A -->
+    <g>
+      <rect x="80" y="130" width="250" height="92" rx="14" fill="#0B141C" stroke="#23485A"/>
+      <text x="102" y="164" font-size="15" fill="#8CF8E1">.myc  source</text>
+      <text x="102" y="188" font-size="12" fill="#7E97A6">94 ASCII glyphs</text>
+      <text x="102" y="206" font-size="12" fill="#7E97A6">order-free ledger</text>
+    </g>
+    <g>
+      <rect x="370" y="130" width="250" height="92" rx="14" fill="#0B141C" stroke="#23485A"/>
+      <text x="392" y="164" font-size="15" fill="#8CF8E1">RCT</text>
+      <text x="392" y="188" font-size="12" fill="#7E97A6">typed reactive hypergraph</text>
+      <text x="392" y="206" font-size="12" fill="#7E97A6">effect rows: physics/spike</text>
+    </g>
+    <g>
+      <rect x="660" y="130" width="250" height="92" rx="14" fill="#0B141C" stroke="#2C5A6B"/>
+      <text x="682" y="164" font-size="15" fill="#8CF8E1">myc.topos  +  myc.geom</text>
+      <text x="682" y="188" font-size="12" fill="#7E97A6">axis algebra &#183; Q^7 units</text>
+      <text x="682" y="206" font-size="12" fill="#7E97A6">Tan/Cot discipline</text>
+    </g>
+    <g>
+      <rect x="950" y="130" width="250" height="92" rx="14" fill="#0B141C" stroke="#2C5A6B"/>
+      <text x="972" y="164" font-size="15" fill="#8CF8E1">myc.flow  +  myc.diff</text>
+      <text x="972" y="188" font-size="12" fill="#7E97A6">DAE normal form</text>
+      <text x="972" y="206" font-size="12" fill="#7E97A6">reverse-mode + checkpoints</text>
+    </g>
+
+    <g stroke="#3E7A8C" stroke-width="1.6" marker-end="url(#arrow)">
+      <path d="M330 176 H 362"/>
+      <path d="M620 176 H 652"/>
+      <path d="M910 176 H 942"/>
+    </g>
+
+    <!-- ROW B -->
+    <g>
+      <rect x="80" y="300" width="250" height="92" rx="14" fill="#0B141C" stroke="#23485A"/>
+      <text x="102" y="334" font-size="15" fill="#8CF8E1">myc.neuro  +  myc.evo</text>
+      <text x="102" y="358" font-size="12" fill="#7E97A6">LIF / LTC eventify</text>
+      <text x="102" y="376" font-size="12" fill="#7E97A6">population axes</text>
+    </g>
+    <g>
+      <rect x="370" y="300" width="250" height="92" rx="14" fill="#0B141C" stroke="#23485A"/>
+      <text x="392" y="334" font-size="15" fill="#8CF8E1">myc.sched</text>
+      <text x="392" y="358" font-size="12" fill="#7E97A6">min-cut placement</text>
+      <text x="392" y="376" font-size="12" fill="#7E97A6">clock domains &#183; hydration</text>
+    </g>
+    <g>
+      <rect x="660" y="300" width="250" height="92" rx="14" fill="#0B141C" stroke="#2C5A6B"/>
+      <text x="682" y="334" font-size="15" fill="#8CF8E1">linalg -&gt; memref</text>
+      <text x="682" y="358" font-size="12" fill="#7E97A6">one-shot bufferize</text>
+      <text x="682" y="376" font-size="12" fill="#7E97A6">static shapes only</text>
+    </g>
+    <g>
+      <rect x="950" y="300" width="250" height="92" rx="14" fill="#0B141C" stroke="#2C5A6B"/>
+      <text x="972" y="334" font-size="15" fill="#8CF8E1">myc.mem-plan</text>
+      <text x="972" y="358" font-size="12" fill="#7E97A6">interval coloring</text>
+      <text x="972" y="376" font-size="12" fill="#7E97A6">phase arenas &#183; 0 alloc</text>
+    </g>
+
+    <g stroke="#3E7A8C" stroke-width="1.6" marker-end="url(#arrow)">
+      <path d="M330 346 H 362"/>
+      <path d="M620 346 H 652"/>
+      <path d="M910 346 H 942"/>
+    </g>
+    <path d="M205 222 V 292" stroke="#3E7A8C" stroke-width="1.6" marker-end="url(#arrow)" fill="none"/>
+    <path d="M495 222 V 292" stroke="#3E7A8C" stroke-width="1.6" marker-end="url(#arrow)" fill="none"/>
+    <path d="M785 222 V 292" stroke="#3E7A8C" stroke-width="1.6" marker-end="url(#arrow)" fill="none"/>
+    <path d="M1075 222 V 292" stroke="#3E7A8C" stroke-width="1.6" marker-end="url(#arrow)" fill="none"/>
+
+    <!-- ROW C: backends -->
+    <rect x="80" y="440" width="1120" height="150" rx="16" fill="#081119" stroke="#1B3A4A"/>
+    <text x="102" y="472" font-size="12" letter-spacing="3" fill="#5E7A8A">BACKEND FORK</text>
+
+    <g>
+      <rect x="102" y="486" width="200" height="82" rx="12" fill="#0B141C" stroke="#2C5A6B"/>
+      <text x="120" y="516" font-size="13" fill="#8CF8E1">CUDA / ROCm</text>
+      <text x="120" y="538" font-size="11" fill="#7E97A6">nvvm &#183; rocdl</text>
+      <text x="120" y="555" font-size="11" fill="#7E97A6">fused tick kernels</text>
+    </g>
+    <g>
+      <rect x="322" y="486" width="200" height="82" rx="12" fill="#0B141C" stroke="#2C5A6B"/>
+      <text x="340" y="516" font-size="13" fill="#8CF8E1">Apple Silicon</text>
+      <text x="340" y="538" font-size="11" fill="#7E97A6">MSL &#183; ANE</text>
+      <text x="340" y="555" font-size="11" fill="#7E97A6">zero-copy weights</text>
+    </g>
+    <g>
+      <rect x="542" y="486" width="200" height="82" rx="12" fill="#0B141C" stroke="#2C5A6B"/>
+      <text x="560" y="516" font-size="13" fill="#8CF8E1">NPU</text>
+      <text x="560" y="538" font-size="11" fill="#7E97A6">TOSA &#183; vendor</text>
+      <text x="560" y="555" font-size="11" fill="#7E97A6">tensor cores</text>
+    </g>
+    <g>
+      <rect x="762" y="486" width="200" height="82" rx="12" fill="#0B141C" stroke="#6FE9D4" stroke-opacity="0.6"/>
+      <text x="780" y="516" font-size="13" fill="#6FE9D4">Neuromorphic</text>
+      <text x="780" y="538" font-size="11" fill="#7E97A6">Lava (Loihi 2)</text>
+      <text x="780" y="555" font-size="11" fill="#7E97A6">MetaTF (Akida) &#183; no clock</text>
+    </g>
+    <g>
+      <rect x="982" y="486" width="200" height="82" rx="12" fill="#0B141C" stroke="#2C5A6B"/>
+      <text x="1000" y="516" font-size="13" fill="#8CF8E1">CPU</text>
+      <text x="1000" y="538" font-size="11" fill="#7E97A6">LLVM &#183; emitc</text>
+      <text x="1000" y="555" font-size="11" fill="#7E97A6">hard real-time</text>
+    </g>
+
+    <g stroke="#3E7A8C" stroke-width="1.6" marker-end="url(#arrow)">
+      <path d="M202 392 V 432"/>
+      <path d="M492 392 V 432"/>
+      <path d="M782 392 V 432"/>
+      <path d="M1072 392 V 432"/>
+    </g>
+
+    <!-- ROW D -->
+    <rect x="80" y="640" width="1120" height="86" rx="16" fill="#0A1A14" stroke="#2E7A67"/>
+    <text x="104" y="674" font-size="13" letter-spacing="1" fill="#8CF8E1">FIELD RESOLUTION ENGINE</text>
+    <text x="104" y="700" font-size="12" fill="#7E97A6">monotone frontiers &#183; hybrid push/pull &#183; versioned hydration &#183; counter-based RNG &#183; steady-state allocations: 0</text>
+
+    <g font-family="inherit">
+      <rect x="80" y="756" width="340" height="24" rx="12" fill="#0E2230" stroke="#2C5A6B"/>
+      <text x="250" y="772" font-size="11" text-anchor="middle" fill="#6FE9D4">myc-geom-verify &#183; Presburger + Z3</text>
+      <rect x="440" y="756" width="340" height="24" rx="12" fill="#0E2230" stroke="#2C5A6B"/>
+      <text x="610" y="772" font-size="11" text-anchor="middle" fill="#6FE9D4">myc-flow-stiffness &#183; spectral radius</text>
+      <rect x="800" y="756" width="400" height="24" rx="12" fill="#0E2230" stroke="#2C5A6B"/>
+      <text x="1000" y="772" font-size="11" text-anchor="middle" fill="#6FE9D4">myc-wcet &#183; proves tick &lt;= dt_phys</text>
+    </g>
+  </g>
+</svg>

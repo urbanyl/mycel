@@ -1,0 +1,54 @@
+name: Bug report
+description: The front end does something the spec says it should not, or refuses something it should accept.
+title: "[bug] "
+labels: ["bug", "frontend"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Adversarial `.myc` files are the single most useful contribution to this project.
+        Please keep the reproducer as small as you can make it.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `mycel --version`, plus Python version.
+      placeholder: "mycel 0.9.1, Python 3.12.4"
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproducer
+      description: The smallest `.myc` file that shows the problem.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: What the specification says should happen, with a link to the relevant section.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: The command you ran and the full output.
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: axiom
+    attributes:
+      label: Which axiom does this touch?
+      options:
+        - A1 - program is a world
+        - A2 - time is a dimension
+        - A3 - branching is routing
+        - A4 - every differentiable edge is auto-adjoint
+        - A5 - nothing is allocated at runtime
+        - none of them, this is a tooling bug
+    validations:
+      required: false

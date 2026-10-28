@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mycel-lang"
+version = "0.9.1"
+description = "MYCEL - a continuous reactive field topology language for embodied AI, neuro-evolution and tensor fields. ASCII-only surface syntax."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "urbanyl" }]
+keywords = [
+    "programming-language",
+    "compiler",
+    "mlir",
+    "neuromorphic",
+    "spiking-neural-networks",
+    "differentiable-programming",
+    "dataflow",
+    "embodied-ai",
+    "tensor",
+    "robotics",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Compilers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-cov>=5"]
+
+[project.urls]
+Homepage = "https://github.com/urbanyl/mycel"
+Documentation = "https://github.com/urbanyl/mycel/tree/main/docs"
+Repository = "https://github.com/urbanyl/mycel"
+Issues = "https://github.com/urbanyl/mycel/issues"
+Changelog = "https://github.com/urbanyl/mycel/blob/main/CHANGELOG.md"
+
+[project.scripts]
+mycel = "mycel.cli:main"
+
+[tool.setuptools]
+packages = ["mycel"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.coverage.run]
+source = ["mycel"]

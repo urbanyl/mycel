@@ -1,0 +1,72 @@
+# =====================================================================
+#  MYCEL / 03 - thermostat with hysteresis, learning, and evolution
+#
+#  A small but complete specimen: a physical loop, a learned bias, and a
+#  slow structural search. Every mechanism present in the biped example
+#  appears here in miniature.
+# =====================================================================
+
+$ world dt=10ms solver=explicit_rk4
+$ deploy batch B=4
+
+# ---------------------------------------------------------------------
+#  SENSING - hardware pushes; the ledger never polls
+# ---------------------------------------------------------------------
+@ t_room  ~> sensor.ambient      : real[] K
+@ t_out   ~> sensor.outdoor      : real[] K
+@ occ     ~> sensor.occupancy    : real[] 1
+
+@ x := cat[in]( t_room , t_out , occ , t_room * occ )  : real[in 4] 1
+
+# ---------------------------------------------------------------------
+#  A LEARNED BIAS - one scalar, trained continuously, not in epochs
+# ---------------------------------------------------------------------
+@ b << -eta * grad(b, L)   seed 0.0   : real[] 1
+
+@ setpoint := 293.15 + b * 4.0        : real[] K
+
+# ---------------------------------------------------------------------
+#  HYSTERESIS WITHOUT BRANCHES
+#
+#  A classic thermostat switches on below 292.65 K and off above 293.65 K.
+#  Expressed as a field, the switch is the *derivative of a smooth
+#  potential*, so it is differentiable, vectorisable, and has no
+#  divergent control flow.
+# ---------------------------------------------------------------------
+@ err      := t_room - setpoint                       : real[] K
+@ switch   := tanh( -err / 0.35 )                     : real[] 1     # -1 off, +1 on
+@ demand   := ( switch + 1.0 ) / 2.0                  : real[] 1
+
+@ p_max    := 2400.0                                  : real[] W
+@ power    := p_max * demand                          : real[] W
+@ power    !> actuator.boiler
+
+# ---------------------------------------------------------------------
+#  COST - comfort, energy, and wear, integrated over a rolling window
+# ---------------------------------------------------------------------
+@ tgt      := 293.15                                  : real[] K
+@ comfort  := norm( t_room - tgt )^2                  : real[] K^2
+@ energy   := norm( power )^2                         : real[] W^2
+@ wear     := norm( deriv(power) )^2                  : real[] W^2/s^2
+
+@ L := int[t-30min..t] ( 1.0*comfort + 1e-6*energy + 1e-3*wear ) : real[] K^2*s
+
+# ---------------------------------------------------------------------
+#  TOPOLOGY EVOLUTION - the controller's own shape is searched, slowly
+# ---------------------------------------------------------------------
+@ G := genome(b, w_comfort, w_energy, w_wear)
+
+@ P := G <<<[rate 5min] vary( mutate 0.02 , sprout , prune , crossover ) \
+            seed clone(G, variant 16)
+
+@ Ps := P >>[variant] shadow_world
+@ LP := int[0min..10min] rollout(plant, Ps)   : real[variant 16] K^2*s
+@ G  <<< argmax[LP](P) ++ archive_best
+
+# ---------------------------------------------------------------------
+#  OBLIGATIONS
+# ---------------------------------------------------------------------
+assert power    : real[] W
+assert t_room - setpoint : real[] K
+assert pair( power , demand ) : real[] W
+assert acyclic(G, time)

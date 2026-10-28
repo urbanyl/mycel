@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="MYCEL closed-loop field topology of a bipedal walker">
+  <defs>
+    <linearGradient id="fbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#05080c"/>
+      <stop offset="1" stop-color="#071119"/>
+    </linearGradient>
+    <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#4E8FA2"/>
+    </marker>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#B78CFF"/>
+    </marker>
+    <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#6FE9D4"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#fbg)"/>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace">
+    <text x="60" y="44" font-size="15" letter-spacing="4" fill="#5E7A8A">MYCEL / ONE CLOSED FIELD LOOP</text>
+    <text x="60" y="70" font-size="13" fill="#7E97A6">sensors push &#183; actuators pull &#183; the weight field learns &#183; the topology field evolves</text>
+
+    <!-- SENSORS -->
+    <rect x="60" y="170" width="230" height="180" rx="14" fill="#0B141C" stroke="#2C5A6B"/>
+    <text x="80" y="200" font-size="13" fill="#8CF8E1">@ omega ~&gt;</text>
+    <text x="80" y="222" font-size="11" fill="#7E97A6">imu.gyro      rad/s</text>
+    <text x="80" y="248" font-size="13" fill="#8CF8E1">@ th ~&gt; / @ dth ~&gt;</text>
+    <text x="80" y="270" font-size="11" fill="#7E97A6">enc.angle     rad</text>
+    <text x="80" y="296" font-size="13" fill="#8CF8E1">@ lam ~&gt;</text>
+    <text x="80" y="318" font-size="11" fill="#7E97A6">feet.load     N</text>
+
+    <!-- FUSE -->
+    <rect x="330" y="220" width="170" height="80" rx="14" fill="#0B141C" stroke="#2C5A6B"/>
+    <text x="348" y="252" font-size="13" fill="#8CF8E1">x := cat[in](...)</text>
+    <text x="348" y="276" font-size="11" fill="#7E97A6">real[in 44] 1</text>
+
+    <!-- TISSUE -->
+    <rect x="540" y="170" width="320" height="180" rx="16" fill="#0A1A18" stroke="#2E7A67"/>
+    <text x="562" y="200" font-size="13" fill="#6FE9D4">LiquidTissue(n 256)</text>
+    <text x="562" y="230" font-size="12" fill="#C9DEE8">h &lt;&lt; ( -h + tanh(</text>
+    <text x="562" y="250" font-size="12" fill="#C9DEE8">      W_hh .*[pre] h</text>
+    <text x="562" y="270" font-size="12" fill="#C9DEE8">    + W_xh .*[in] x + b ) ) / tau</text>
+    <text x="562" y="294" font-size="11" fill="#7E97A6">seed 0 &#183; solver chosen from the</text>
+    <text x="562" y="312" font-size="11" fill="#7E97A6">jacobian spectrum &#183; real[post n] 1</text>
+    <text x="562" y="336" font-size="11" fill="#B78CFF">nu := surro(h, dsigmoid(h - vth))</text>
+
+    <!-- MOTOR -->
+    <rect x="900" y="220" width="170" height="80" rx="14" fill="#0B141C" stroke="#2C5A6B"/>
+    <text x="918" y="252" font-size="13" fill="#8CF8E1">tau := clamp(</text>
+    <text x="918" y="272" font-size="12" fill="#C9DEE8">  tauNN + tauPD )</text>
+    <text x="918" y="292" font-size="11" fill="#7E97A6">Cot[joint 12] N*m</text>
+
+    <!-- JOINTS -->
+    <rect x="1110" y="170" width="130" height="180" rx="14" fill="#0B141C" stroke="#2C5A6B"/>
+    <text x="1128" y="200" font-size="13" fill="#8CF8E1">agent</text>
+    <text x="1128" y="220" font-size="13" fill="#8CF8E1">.joints</text>
+    <text x="1128" y="250" font-size="11" fill="#7E97A6">!&gt; boundary</text>
+    <text x="1128" y="268" font-size="11" fill="#7E97A6">condition</text>
+    <text x="1128" y="292" font-size="11" fill="#7E97A6">on the</text>
+    <text x="1128" y="310" font-size="11" fill="#7E97A6">effector</text>
+    <text x="1128" y="328" font-size="11" fill="#7E97A6">manifold</text>
+
+    <!-- EVOLVE -->
+    <rect x="540" y="86" width="320" height="52" rx="12" fill="#12091C" stroke="#5B3E7E"/>
+    <text x="560" y="108" font-size="12" fill="#C89BFF">G &lt;&lt;&lt; vary(mutate, sprout, prune, crossover)</text>
+    <text x="560" y="126" font-size="11" fill="#7E97A6">seed clone(G, variant 64) &#183; rate 0.25s</text>
+
+    <!-- TRAIN -->
+    <rect x="400" y="420" width="320" height="72" rx="12" fill="#12091C" stroke="#5B3E7E"/>
+    <text x="420" y="446" font-size="12" fill="#C89BFF">tissue.W_hh &lt;&lt; -eta * grad(W_hh, L)</text>
+    <text x="420" y="468" font-size="11" fill="#7E97A6">learning is a field on the weight manifold</text>
+    <text x="420" y="484" font-size="11" fill="#7E97A6">no epoch &#183; no batch &#183; no optimizer object</text>
+
+    <!-- LOSS -->
+    <rect x="60" y="420" width="280" height="72" rx="12" fill="#0B141C" stroke="#2C5A6B"/>
+    <text x="80" y="446" font-size="12" fill="#8CF8E1">L := int[t-2s..t] (</text>
+    <text x="80" y="466" font-size="12" fill="#C9DEE8">  -alpha*vfwd + kappa*fall + rho*norm(tau)^2 )</text>
+    <text x="80" y="484" font-size="11" fill="#7E97A6">real[] 1</text>
+
+    <!-- arrows -->
+    <g stroke="#4E8FA2" stroke-width="1.8" fill="none" marker-end="url(#a1)">
+      <path d="M290 260 H 322"/>
+      <path d="M500 260 H 532"/>
+    </g>
+    <g stroke="#B78CFF" stroke-width="1.8" fill="none" marker-end="url(#a2)">
+      <path d="M860 260 H 892"/>
+    </g>
+    <g stroke="#6FE9D4" stroke-width="1.8" fill="none" marker-end="url(#a3)">
+      <path d="M1070 260 H 1102"/>
+      <path d="M700 170 V 144"/>
+      <path d="M540 456 H 512"/>
+      <path d="M620 420 V 356"/>
+    </g>
+
+    <g font-size="11" fill="#4E8FA2">
+      <text x="296" y="250" font-size="11" fill="#6FA9BC">~&gt;</text>
+      <text x="505" y="250" font-size="11" fill="#6FA9BC">:=</text>
+    </g>
+    <text x="862" y="250" font-size="11" fill="#C89BFF">=&gt;</text>
+    <text x="1078" y="250" font-size="11" fill="#6FE9D4">!&gt;</text>
+    <text x="710" y="160" font-size="11" fill="#6FE9D4">&lt;&lt;&lt;</text>
+    <text x="524" y="448" font-size="11" fill="#6FE9D4">&lt;&lt;</text>
+    <text x="628" y="392" font-size="11" fill="#6FE9D4">&lt;&lt;</text>
+
+    <!-- feedback loop -->
+    <path d="M1175 350 V 545 H 175 V 358" stroke="#4E8FA2" stroke-width="1.6" fill="none" stroke-dasharray="7 6" marker-end="url(#a1)"/>
+    <text x="600" y="562" font-size="11" fill="#6FA9BC">~&gt;  proprioception &#183; contact &#183; base velocity &#183; pose   (the body is the recurrent connection)</text>
+    <path d="M190 545 V 500" stroke="#4E8FA2" stroke-width="1.6" fill="none" marker-end="url(#a1)"/>
+
+    <g font-size="11" fill="#4A6472">
+      <text x="60" y="620">legend:</text>
+      <text x="130" y="620" fill="#6FA9BC">~&gt; event stream</text>
+      <text x="270" y="620" fill="#C89BFF">=&gt; differentiable flow</text>
+      <text x="450" y="620" fill="#6FE9D4">&lt;&lt; continuous recurrence</text>
+      <text x="680" y="620" fill="#6FE9D4">&lt;&lt;&lt; topological evolution</text>
+      <text x="900" y="620" fill="#6FE9D4">!&gt; physical actuation</text>
+    </g>
+  </g>
+</svg>

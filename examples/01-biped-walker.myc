@@ -1,0 +1,160 @@
+# =====================================================================
+#  MYCEL / 01 - embodied biped, liquid neural tissue, continuous
+#                training, neuro-evolutionary topology search
+#
+#  This file is a world, not a program. Lines are independent
+#  assertions; reordering them changes nothing.
+#
+#    mycel check examples/01-biped-walker.myc
+#    mycel trace examples/01-biped-walker.myc --field tissue.h --window 2s
+# =====================================================================
+
+$ world dt=0.5ms gravity=[0,-9.81,0] solver=semi_implicit
+$ deploy batch B=1
+$ solver tissue.h = rosenbrock
+
+
+# =====================================================================
+#  A.1  BODY - an open hypergraph of rigid bodies, joints, and contacts
+# =====================================================================
+% Biped( mass 38kg , height 1.34m )
+  @ trunk  := Rigid( mass , inertia [2.10,2.40,0.90] kg*m^2 , height )
+  @ legL   := Chain( hip ~ knee ~ ankle , dof 3 , links [0.41m, 0.39m] )
+  @ legR   := legL >>[side] mirror_x
+  @ footL  := Contact( ankle , mu 0.85 , radius 0.06m )
+  @ footR  := footL >>[side] mirror_x
+  > ports( imu , enc , load , joints )
+
+@ agent := Biped( 38kg , 1.34m )
+
+
+# =====================================================================
+#  A.2  SENSORY STREAMS - hardware push, event-driven, not differentiable
+# =====================================================================
+@ omega ~> agent.imu.gyro      : real[coord 3] rad/s
+@ acc   ~> agent.imu.accel     : real[coord 3] m/s^2
+@ q     ~> agent.imu.quat      : S3 1
+@ th    ~> agent.enc.angle     : Tan[joint 12] rad
+@ dth   ~> agent.enc.rate      : Tan[joint 12] rad/s
+@ lam   ~> agent.feet.load     : real[foot 2, coord 3] N
+
+# Proprioceptive fusion onto a single named feature axis. cat[] is never
+# implicit: every downstream weight must name the axis it consumes.
+@ x := cat[in]( th , dth , lam , acc , log(q) )   : real[in 44] 1
+
+
+# =====================================================================
+#  A.3  LIQUID NEURAL TISSUE
+#
+#    tau(x) * dh/dt = -h + tanh( W_hh .*[pre] h + W_xh .*[in] x + b )
+#
+#  h is not computed. h IS the solution curve of this field. The
+#  integrator is chosen from the Jacobian spectrum, not by the author.
+# =====================================================================
+% LiquidTissue( n 256 , inn 44 , out 12 )
+  @ W_hh  := ?N(0, n^-0.5)     : real[post n, pre n]  1
+  @ W_xh  := ?N(0, inn^-0.5)   : real[post n, in inn] 1
+  @ W_out := ?N(0, n^-0.5)     : real[out out, post n] 1
+  @ b     := ?U(-0.05, 0.05)   : real[post n] 1
+  @ W_tau := ?U(0.01, 0.05)    : real[post n, in inn] 1
+  @ b_tau := 0.02              : real[] 1
+
+  @ tau   := 20ms * sigmoid( W_tau .*[in] x + b_tau ) + 1ms
+
+  @ h     << ( -h + tanh( W_hh .*[pre] h + W_xh .*[in] x + b ) ) / tau \
+             seed 0            : real[post n] 1
+
+  # Spikes are an event stream. Gradients do not cross events unless the
+  # author names the derivative they are pretending is true.
+  @ nu    := surro( h , dsigmoid( h - vth ) )   : real[post n] 1
+
+  > ports( h , nu , y )
+
+@ tissue := LiquidTissue( 256 , 44 , 12 )
+
+@ y := tissue.W_out .*[post] tissue.h + tissue.b_out   : real[out 12] 1
+@ spk ~> tissue.nu                                     : real[post 256] 1
+
+
+# =====================================================================
+#  A.4  CENTRAL PATTERN GENERATOR + PHYSICAL ACTUATION
+#
+#  Locomotion rhythm is a field, not a state machine. There is no gait
+#  branching anywhere in this file.
+# =====================================================================
+@ phi   << 2 * pi * 1.6                seed 0        : real[] rad
+@ clk   := cat[phase]( sin(phi) , cos(phi) )          : real[phase 2] 1
+
+@ W_m   := ?N(0, 14^-0.5)                             : real[in 14, joint 12] 1
+@ tauNN := cat[in]( y , clk ) .*[in] W_m              : Cot[joint 12] N*m
+@ thref := th0 + A_gait * sin( phi )                  : Tan[joint 12] rad
+
+@ Kp    := 120.0                                      : real[] N*m/rad
+@ Kd    := 6.5                                        : real[] N*m*s/rad
+
+# PD produces a Tan-space quantity; the metric is the only legal way to
+# obtain a torque. The compiler will not insert it silently.
+@ tauPD := metric_Q( Kp * ( thref - th ) + Kd * ( 0 - dth ) ) \
+                                                      : Cot[joint 12] N*m
+
+@ tau_max := 90.0                                     : real[] N*m
+@ balance := 0.65 + 0.35 * tanh( -q.x / 0.15 )        : real[] 1
+
+@ tau   := clamp( tauNN + tauPD , tau_max ) * balance : Cot[joint 12] N*m
+@ tau   !> agent.joints
+
+assert tau : Cot[joint 12]
+assert pair( tau , dth ) : real[] W
+assert axes( tauNN ) == axes( tauPD )
+
+
+# =====================================================================
+#  A.5  CONTINUOUS TRAINING - learning is itself a field
+#
+#  No epoch. No batch. No optimizer object. Gradient descent is an ODE
+#  on the weight manifold, integrated on a slower clock domain.
+# =====================================================================
+@ v_com  := ( trunk.vel .*[coord] [1,0,0] )           : real[] m/s
+@ yaw    := norm( omega .*[coord] [0,1,0] )           : real[] rad/s
+@ fall   := 1 | norm( lam ) < 5.0                     : real[] 1
+@ effort := norm( tau )^2                             : real[] N^2*m^2
+
+@ L := int[t-2s..t] ( -1.0 * v_com + 0.8 * yaw + 12.0 * fall + 1e-4 * effort ) \
+                                                      : real[] m
+
+@ eta := 3e-4                                         : real[] 1
+@ tissue.W_hh  << -eta * grad( tissue.W_hh  , L )     : real[post n, pre n]  1
+@ tissue.W_xh  << -eta * grad( tissue.W_xh  , L )     : real[post n, in inn] 1
+@ tissue.W_out << -eta * grad( tissue.W_out , L )     : real[out out, post n] 1
+@ W_m          << -eta * grad( W_m          , L )     : real[in 14, joint 12] 1
+
+# Each ':=' above supplies the implicit seed. No second draw occurs.
+
+
+# =====================================================================
+#  A.6  NEURO-EVOLUTION - the topology is a slow field
+#
+#  A population is an axis, not a process pool. Sixty-four mutants are
+#  one tensor; their rollouts are one batched integration.
+# =====================================================================
+@ G  := genome( tissue.W_hh , tissue.W_xh , tissue.W_out , W_m )
+
+@ P  := G <<<[rate 0.25s] \
+            vary( mutate 0.02 , sprout , prune , crossover ) \
+            seed clone( G , variant 64 )
+
+@ Ps := P >>[variant] shadow_world          # differentiable imagination fork
+@ LP := int[0s..2s] rollout( agent , Ps )   : real[variant 64] m
+@ G  <<< argmax[LP](P) ++ archive_best      # elitist replacement
+
+
+# =====================================================================
+#  A.7  OBLIGATIONS - proved, then erased
+# =====================================================================
+assert tau : Cot[joint 12]
+assert not unifies( Tan[joint 12] , Cot[joint 12] )
+assert differentiable( L , tissue.W_hh )
+assert no_cut( L , tissue.W_hh )
+assert acyclic( G , time )
+assert wcet(tick) <= dt_phys
+assert envelope( spk ) <= 2ms @ p99

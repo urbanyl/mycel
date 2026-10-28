@@ -1,0 +1,37 @@
+token	kind	name	precedence	assoc	meaning
+:=	connective	bind	0	none	timeless definition; implicit genesis of later << and <<<
+~>	connective	synapse	0	none	event stream; implicit cotangent cut
+=>	connective	flow	0	none	differentiable stream; primal + cotangent slot
+<<	connective	recur	0	none	continuous state: h << f asserts dh/dt = f
+<<<	connective	evolve	0	none	structural evolution on a slow timescale
+!>	connective	actuate	0	none	boundary condition on an effector manifold
+@	role	field	0	none	declare a field
+%	role	assembly	0	none	declare an open hypergraph with named ports
+$	role	world	0	none	world or target directive
+assert	role	obligation	0	none	compile-time proof obligation, erased after discharge
+>	role	export	0	none	expose a port from an assembly
+|	operator	guard	1	left	value defined only where the predicate holds
+||	operator	hydrate	1	left	versioned barrier between clock domains
+.*	operator	contract	2	left	sum over the named axis; all other axes must align
+**	operator	outer	3	left	tensor product over disjoint axes
+~*	operator	manifold	3	left	geometric/convolutional product under a metric
+*	operator	gate	4	left	elementwise; axes must be identical
+/	operator	divide	4	left	elementwise
++	operator	add	5	left	elementwise
+-	operator	subtract	5	left	elementwise
+++	operator	fuse	5	left	topological union of hypergraphs sharing ports
+>=	operator	compare	6	none	predicate
+<=	operator	compare	6	none	predicate
+==	operator	compare	6	none	predicate
+!=	operator	compare	6	none	predicate
+^	operator	power	7	right	elementwise power
+?	prefix	sample	8	prefix	counter-based stochastic draw
+grad	form	gradient	8	prefix	reverse-mode query over the cotangent bundle
+int	form	integral	8	prefix	measure integral over a window
+argmax	form	select	8	prefix	rank selection over an axis; replaces branching
+cut	form	cotangent-cut	8	prefix	explicit stop-gradient
+surro	form	surrogate	8	prefix	attach pseudo-derivative to a non-differentiable event
+pair	form	pairing	8	prefix	the only legal Tan/Cot combination; yields energy
+cat	form	concatenate	8	prefix	join on an axis; never implicit
+~~	operator	adjoint	0	none	f ~~ f_adj declares an analytic adjoint
+>>	operator	reindex	0	none	A >>[a] f changes layout/label along a

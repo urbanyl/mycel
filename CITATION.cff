@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you reference MYCEL in academic work, please cite this specification."
+title: "MYCEL: A Continuous Reactive Field Topology Language for Embodied AI, Neuro-Evolution and Tensor Fields"
+abstract: >-
+  MYCEL is a programming language design in which a program is a ledger of fields rather
+  than a sequence of instructions. Execution is non-sequential: fields are resolved on
+  monotone frontiers across independent clock domains. The language provides structural
+  reverse-mode automatic differentiation, native evolutionary operators on topology, a
+  spatial geometry type system with named axes and SI unit algebra, and a static memory
+  model with zero steady-state allocations. The surface syntax is restricted to the 94
+  printable ASCII code points.
+authors:
+  - alias: urbanyl
+    name: urbanyl
+version: 0.9.1
+date-released: 2026-10-28
+license: MIT
+repository-code: "https://github.com/urbanyl/mycel"
+url: "https://github.com/urbanyl/mycel"
+keywords:
+  - programming languages
+  - compiler design
+  - MLIR
+  - neuromorphic computing
+  - spiking neural networks
+  - differentiable programming
+  - dataflow
+  - embodied artificial intelligence
+  - tensor algebra

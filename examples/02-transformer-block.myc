@@ -1,0 +1,99 @@
+# =====================================================================
+#  MYCEL / 02 - multi-head self-attention as a manifold field
+#
+#  No PyTorch. No JAX. No tape, no requires_grad, no optimizer object.
+#  The gradient graph is a property of the '=>' edges, and asking for
+#  grad(Theta, L) is a query over the cotangent bundle.
+# =====================================================================
+
+$ world dt=16ms solver=explicit_rk4
+$ deploy batch B=8
+$ deploy vocab V=32000
+
+# ---------------------------------------------------------------------
+#  B.1  ATTENTION
+#
+#  Axes are named. A transpose is a layout decision, never a semantic
+#  one. Contraction always names the axis it removes.
+# ---------------------------------------------------------------------
+% Attention( H 12 , d 768 , T 2048 )
+  @ Wq := ?N(0, d^-0.5)   : real[embed d, head H, proj 64] 1
+  @ Wk := ?N(0, d^-0.5)   : real[embed d, head H, proj 64] 1
+  @ Wv := ?N(0, d^-0.5)   : real[embed d, head H, proj 64] 1
+  @ Wo := ?N(0, d^-0.5)   : real[head H, proj 64, embed d] 1
+
+  # three parallel projections onto the head manifold
+  @ Q := X .*[embed] Wq   : real[batch B, time T, head H, proj 64] 1
+  @ K := X .*[embed] Wk   : real[batch B, key T,  head H, proj 64] 1
+  @ V := X .*[embed] Wv   : real[batch B, key T,  head H, proj 64] 1
+
+  # scores on the (time x key) manifold; the causal mask is a guard,
+  # not a branch, so there is no divergent control flow
+  @ S := ( Q .*[proj] K ) / sqrt(64) | time >= key \
+           : real[batch B, head H, time T, key T] 1
+
+  # softmax is a normalisation ON THE SIMPLEX: the compiler knows
+  # sum[key] == 1 and fuses the max-shift, exp, and reduce
+  @ Pp := softmax[key]( S )   : real[batch B, head H, time T, key T] 1
+
+  # weighted aggregation, then head merge
+  @ A  := Pp .*[key] V        : real[batch B, time T, head H, proj 64] 1
+  @ A2 := A .*[head, proj] Wo : real[batch B, time T, embed d] 1
+
+  # residual is addition on identical axes; fusion of structures is '++'
+  @ Y  := norm_lay( A2 + X )  : real[batch B, time T, embed d] 1
+
+  > ports( Y )
+
+@ layer := Attention( 12 , 768 , 2048 )
+
+
+# ---------------------------------------------------------------------
+#  B.2  FORWARD
+# ---------------------------------------------------------------------
+@ X := dataset.tokens >>[embed]   : real[batch B, time T, embed d] 1
+@ Z := cat[in]( layer.Y , X )     : real[batch B, time T, in 1536] 1
+
+@ Wf := ?N(0, 1536^-0.5)          : real[in 1536, out 1536] 1
+@ H1 := gelu( Z .*[in] Wf )       : real[batch B, time T, out 1536] 1
+
+@ Wu := ?N(0, 1536^-0.5)          : real[out 1536, vocab V] 1
+@ logits := H1 .*[out] Wu         : real[batch B, time T, vocab V] 1
+
+
+# ---------------------------------------------------------------------
+#  B.3  LOSS AND THE PARAMETER FIELD
+# ---------------------------------------------------------------------
+@ L := -pair( logsoftmax[vocab]( logits ) , targets ) / ( B * T )  : real[] 1
+
+@ Theta := bundle( layer.Wq , layer.Wk , layer.Wv , layer.Wo , Wf , Wu )
+
+# Adam expressed as two more fields. Still no optimizer object: the
+# preconditioner is state on the parameter manifold.
+@ m     << ( grad( Theta , L ) - m ) / 0.9                  seed 0
+@ v     << ( grad( Theta , L ) * grad( Theta , L ) - v ) / 0.999   seed 0
+@ mh    := m / ( 1 - 0.9^step )
+@ vh    := v / ( 1 - 0.999^step )
+@ Theta << -1e-4 * mh / ( sqrt(vh) + 1e-8 )                 seed Theta
+
+@ step  << 1.0                                              seed 0
+
+# ---------------------------------------------------------------------
+#  B.4  CLOSURE OBLIGATIONS
+# ---------------------------------------------------------------------
+assert sum[key]( Pp ) == 1
+assert axes( Pp ) == cat[axes]( batch , head , time , key )
+assert d == H * 64
+assert differentiable( L , Theta )
+assert no_cut( L , Theta )
+
+
+# ---------------------------------------------------------------------
+#  B.5  ANALYTIC ADJOINTS FOR PRIMITIVES
+#
+#  Declaring the adjoint lets the compiler skip tracing the primitive
+#  and fuse the core kernel with its transpose.
+# ---------------------------------------------------------------------
+@ gelu    ~~ gelu_adj
+@ maxpool ~~ argmax_route
+@ norm_lay ~~ norm_lay_adj

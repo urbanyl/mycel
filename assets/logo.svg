@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="MYCEL logo">
+  <defs>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#8CF8E1"/>
+      <stop offset="0.5" stop-color="#4FD6E9"/>
+      <stop offset="1" stop-color="#B78CFF"/>
+    </linearGradient>
+    <radialGradient id="core" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#CFFDF2"/>
+      <stop offset="0.45" stop-color="#5EE3D0" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#33E1C4" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="4" y="4" width="248" height="248" rx="58" fill="#070D13" stroke="url(#ring)" stroke-width="2" stroke-opacity="0.75"/>
+  <circle cx="128" cy="128" r="86" fill="url(#core)" opacity="0.35"/>
+
+  <g fill="none" stroke="url(#ring)" stroke-width="1.6" opacity="0.85" stroke-linecap="round">
+    <path d="M128 52 C 168 60, 190 92, 196 128"/>
+    <path d="M196 128 C 190 166, 168 196, 128 204"/>
+    <path d="M128 204 C 88 196, 66 166, 60 128"/>
+    <path d="M60 128 C 66 92, 88 60, 128 52"/>
+    <path d="M128 128 L 128 52"/>
+    <path d="M128 128 L 196 128"/>
+    <path d="M128 128 L 128 204"/>
+    <path d="M128 128 L 60 128"/>
+  </g>
+
+  <g fill="#0B1620" stroke="url(#ring)" stroke-width="1.6">
+    <circle cx="128" cy="52" r="9"/>
+    <circle cx="196" cy="128" r="9"/>
+    <circle cx="128" cy="204" r="9"/>
+    <circle cx="60" cy="128" r="9"/>
+  </g>
+
+  <g fill="#6FE9D4" opacity="0.9">
+    <circle cx="128" cy="52" r="3"/>
+    <circle cx="196" cy="128" r="3"/>
+    <circle cx="128" cy="204" r="3"/>
+    <circle cx="60" cy="128" r="3"/>
+  </g>
+
+  <circle cx="128" cy="128" r="26" fill="url(#core)"/>
+  <circle cx="128" cy="128" r="11" fill="#D6FFF6"/>
+  <circle cx="128" cy="128" r="11" fill="none" stroke="#0B1620" stroke-width="1" opacity="0.35"/>
+</svg>

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Read the specification first
+    url: https://github.com/urbanyl/mycel/blob/main/docs/01-language-spec.md
+    about: Most questions are answered by sections 3-8 of the language specification.
+  - name: FAQ
+    url: https://github.com/urbanyl/mycel/blob/main/docs/07-faq.md
+    about: "How do you write a counter?" and other questions that come up every time.
